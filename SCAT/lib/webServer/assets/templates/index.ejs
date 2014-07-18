@@ -1,0 +1,42 @@
+<html ng-app="OPTool">
+  <head>
+    <title>Organic Performance</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Open+Sans:300italic,400,300,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="/assets/semanticui/css/semantic.min.css"/>
+    <link rel="stylesheet/less" type="text/css" href="/assets/css/styles.less" />
+
+    <script type="text/javascript" src="/assets/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/assets/semanticui/javascript/semantic.min.js"></script>
+    <script type="text/javascript" src="/assets/angular/angular.min.js"></script>
+    <script type="text/javascript" src="/assets/angular-route/angular-route.min.js"></script>
+    <script type="text/javascript" src="/assets/angular-ui-router/angular-ui-router.min.js"></script>
+    <script type="text/javascript" src="/assets/primus/primus.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/less.js/1.7.3/less.min.js"></script>
+
+    <script type="text/javascript" src="/assets/js/base.js"></script>
+
+    <% for(var i=0; i < plugins.scriptUrls.length; i++) { %>
+      <script type="text/javascript" src="<%= plugins.scriptUrls[i] %>"></script>
+    <% } %>
+
+    <script type="text/javascript" src="/assets/js/angularBase.js"></script>
+  </head>
+
+  <body class="scat">
+    <div ng-controller="Menu" class="ui menu teal inverted">
+      <a href="#" class="header active item"><i class="home icon"></i> S.C.A.T</a>
+      <div class="right menu">
+        <div class="ui dropdown link item inverted">
+          Tools ({{plugins.length}})
+          <i class="dropdown icon"></i>
+          <div class="menu">
+            <a ng-repeat="plugin in plugins" href="#{{plugin.url}}" class="item">{{plugin.name}}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div ui-view></div>
+  </body>
+</html>

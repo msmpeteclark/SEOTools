@@ -1,0 +1,23 @@
+<div class="ui page grid masthead">
+  <div class="ui column">
+    <div class="ui teal segment">
+      <h1>Super Cool Audit Tool</h1>
+      <hr/>
+      <p>Welcome to the HTML audit tool!</p>
+    </div>
+  </div>
+</div>
+
+<div class="ui page grid two column html-audit">
+  <div class="four wide column">
+    <div class="ui fluid vertical menu teal">
+      <a class="item" ng-class="{ active : currentState == 'HTMLAudit.AddJob' }" ui-sref="HTMLAudit.AddJob">Add Job</a>
+      <a class="item" ng-class="{ active : currentState == 'HTMLAudit.ActiveJobs' }" ui-sref="HTMLAudit.ActiveJobs">Active Jobs</a>
+      <a class="item" ng-class="{ active : currentState == 'HTMLAudit.CompletedJobs' }" ui-sref="HTMLAudit.CompletedJobs">Completed Jobs</a>
+    </div>
+  </div>
+
+  <div class="twelve wide column overview">
+    <div ui-view></div>
+  </div>
+</div>

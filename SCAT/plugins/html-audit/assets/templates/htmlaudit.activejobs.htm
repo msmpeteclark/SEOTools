@@ -1,0 +1,19 @@
+<div class="ui segment">
+  <div class="ui fluid vertical menu active-jobs-list" ng-show="jobId === null">
+    <a
+      ng-repeat = "job in jobs"
+      class="item"
+      ng-class="{ active : currentState == 'HTMLAudit.AddJob' }"
+      ui-sref="HTMLAudit.AddJob"
+      title="Name : {{job.name}}, ID : {{job._id}}"
+    >
+      <div class="ui active striped progress">
+        <div class="bar" style="width: {{jobInfo[job._id].progress}}%;"></div>
+      </div>
+      <span>{{job.name}}</span>
+    </a>
+  </div>
+  <div>
+    Job ID : {{jobId}}
+  </div>
+</div>

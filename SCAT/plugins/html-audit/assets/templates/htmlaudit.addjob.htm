@@ -1,0 +1,17 @@
+<form class="ui segment form">
+  <div class="field">
+    <label>Job name</label>
+    <input type="text" ng-model="model.jobName"/>
+  </div>
+  <div class="field">
+    <label>URLs to scan</label>
+    <textarea ng-model="model.urlsToScan"></textarea>
+  </div>
+  <div class="ui message">
+    <div class="header">Job Summary</div>
+    <ul class="list">
+      <li>Number of URLs : {{model.urlsToScan.split("\n").length}}</li>
+    </ul>
+  </div>
+  <div class="ui submit button" ng-click="submit()">Create</div>
+</form>
