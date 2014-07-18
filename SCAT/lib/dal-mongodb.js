@@ -104,7 +104,7 @@ module.exports = function(dep, settings) {
         properties = options.properties;
 
     var SelectedModel = Models[modelName];
-    if (dh.guard(SelectedModel === undefined, "Cannot create model because name not recognised '"+  modelName +"'", callback)) {return;}
+    if (dh.guard(SelectedModel === undefined, "Cannot create model because name not recognised '"+  modelName +"'.", callback)) {return;}
 
     var model = new SelectedModel(properties);
 
