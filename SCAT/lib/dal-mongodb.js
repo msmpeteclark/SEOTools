@@ -13,13 +13,16 @@ module.exports = function(dep, settings) {
 
   var driver = {
     initialise : initialise,
+    createSession : createSession,
     registerPlugin : registerPlugin,
     createJob : createJob,
     getActiveJobs : getActiveJobs,
+    getJob : getJob,
     getJobs : getJobs,
     getJobsProgress : getJobsProgress,
     createModel : createModel,
-    getModels : getModels
+    getModels : getModels,
+    saveModels : saveModels
   };
   return driver;
 
@@ -33,6 +36,14 @@ module.exports = function(dep, settings) {
     });
     db.once("open", function() {
       callback();
+    });
+  }
+
+  function createSession(options, callback) {
+    var session = new Models.Session();
+    session.save(function(err) {
+      if (dh.guard(err, callback)) {return;}
+      callback(null, session);
     });
   }
 
@@ -75,14 +86,23 @@ module.exports = function(dep, settings) {
 
     var query = {
       pluginType : pluginType,
-      jobType : jobType,
-      status : "active"
+      jobType : jobType
     };
     Models.Job.find(query, function(err, jobs) {
       if (dh.guard(err, callback)) {return;}
       console.log("getting active jobs")
       console.log(jobs);
       callback(null, jobs);
+    });
+  }
+
+  function getJob(options, callback) {
+    var jobId = options.job._id;
+    Models.Job.findOne({ _id : jobId }, function(err, job) {
+      if (dh.guard(err, callback)) {return;}
+      console.log("getting job")
+      console.log(job);
+      callback(null, job);
     });
   }
 
@@ -116,14 +136,31 @@ module.exports = function(dep, settings) {
 
   function getModels(options, callback) {
     var pluginType = options.pluginType, modelName = options.name,
-        query = options.query;
+        query = options.query, limit = options.limit || 10000;
 
     var SelectedModel = Models[modelName];
 
-    SelectedModel.find(query, function(err, models) {
-      if (dh.guard(err, callback)) {return;}
-      callback(null, models);
-    });
+    SelectedModel
+      .find(query)
+      .limit(limit)
+      .exec(function(err, models) {
+        if (dh.guard(err, callback)) {return;}
+        callback(null, models);
+      });
+  }
+
+  function saveModels(options, callback) {
+    var pluginType = options.pluginType, modelName = options.name, models = options.models;
+
+    var SelectedModel = Models[modelName];
+
+    async.forEach(models, function(model, next) {
+      var updatedModel = new SelectedModel(model);
+      updatedModel.remove(function(err) {
+        if (dh.guard(err, next)) {return;}
+        updatedModel.save(next);
+      });
+    }, callback);
   }
 
   function getJobsProgress(options, callback) {
@@ -149,9 +186,13 @@ module.exports = function(dep, settings) {
       id : mongoose.Schema.ObjectId,
       name : { type : String, default : "Unnamed" },
       pluginType : String,
-      jobType : String,
-      status : { type: String, default: "active" }
+      jobType : String
     });
     Models.Job = mongoose.model("Job", Schemas.Job);
+
+    Schemas.Session = mongoose.Schema({
+      id : mongoose.Schema.ObjectId
+    });
+    Models.Session = mongoose.model("Session", Schemas.Session);
   }
 };

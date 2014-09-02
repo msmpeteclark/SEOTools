@@ -5,8 +5,8 @@ module.exports = function(dep) {
   var logTypes = {
     error : { handler : function displayError(message, err) {
       console.error(message.red.bold);
-      if (err && err.stack) { console.error(err.stack); }
-      if (err && err.inner) { displayError(err.inner.message, err.inner); }
+      if (err && err.stack) { console.error(("Stack Trace:-\n"+ err.stack).red); }
+      if (err && err.inner) { console.error("Inner Exception:-\n".red.bold); displayError(err.inner.message, err.inner); }
     }},
     info : { color : "grey" },
     event : { color : "cyan", bold : true }
@@ -36,7 +36,7 @@ module.exports = function(dep) {
     }
   }
 
-   function guard() {
+  function guard() {
     var args = Array.prototype.slice.apply(arguments);
     var isError = args.shift();
     var callback = args.length > 0 && typeof(args[args.length-1]) == "function" ? args.pop() : null;

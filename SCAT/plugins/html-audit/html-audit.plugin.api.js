@@ -6,7 +6,8 @@ module.exports = function(dep) {
     methods : {
       "/add-job" : { controller : addJob },
       "/active-jobs" : { controller : activeJobs },
-      "/job-progress" : { controller : jobProgress }
+      "/job-progress" : { controller : jobProgress },
+      "/job-start" : { controller : jobStart }
     }
   };
 
@@ -39,6 +40,15 @@ module.exports = function(dep) {
       console.log("Got Jobs Progress.");
       console.log(jobsProgress);
       callback(null, jobsProgress);
+    });
+  }
+
+  function jobStart(options, callback) {
+    var job = options.job;
+    jobManager.jobStart({ job : job }, function(err) {
+      if (dh.guard(err, callback)) {return;}
+      console.log("Job Started.");
+      callback();
     });
   }
 };

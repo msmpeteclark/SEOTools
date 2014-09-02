@@ -13,6 +13,7 @@
     "semantic": "~0.18.0",
     "angular": "~1.2.19",
     "angular-route": "~1.2.19",
-    "angular-ui-router": "~0.2.10"
+    "angular-ui-router": "~0.2.10",
+    "ace-builds": "~1.1.6"
   }
 }

@@ -4,16 +4,27 @@
       ng-repeat = "job in jobs"
       class="item"
       ng-class="{ active : currentState == 'HTMLAudit.AddJob' }"
-      ui-sref="HTMLAudit.AddJob"
+      ui-sref="HTMLAudit.ActiveJobs.View({ jobId : job._id })"
       title="Name : {{job.name}}, ID : {{job._id}}"
     >
       <div class="ui active striped progress">
-        <div class="bar" style="width: {{jobInfo[job._id].progress}}%;"></div>
+        <div class="bar" style="width: {{jobInfo[job._id].progress.percent}}%;"></div>
       </div>
-      <span>{{job.name}}</span>
+      <span>{{jobInfo[job._id].progress.count}} of {{jobInfo[job._id].progress.total}}</span><br/>
+      <span>{{job.name}} - {{jobInfo[job._id].progress.status}}</span>
     </a>
   </div>
-  <div>
-    Job ID : {{jobId}}
+  <div ng-show="jobId !== null">
+    <div class="ui active striped progress">
+      <div class="bar" style="width: {{jobInfo[jobId].progress.percent}}%;"></div>
+    </div>
+    <span>{{jobInfo[jobId].progress.count}} of {{jobInfo[jobId].progress.total}}</span><br/>
+    <span>Name : {{jobInfo[jobId].job.name}}</span>
+    <br/>
+    <span>Status : {{jobInfo[jobId].progress.status}}</span>
+    <br/>
+    <span>Job ID : {{jobId}}</span>
+    <br/>
+    <span ng-click="startJob()" class="ui button">Start</span>
   </div>
 </div>

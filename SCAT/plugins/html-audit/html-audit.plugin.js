@@ -24,15 +24,15 @@ module.exports = function(dep) {
 function registerModels(options, callback) {
   var mongoose = options.mongoose, Schemas = options.Schemas, Models = options.Models;
 
-  Schemas.AuditBatch = mongoose.Schema({
+  Schemas.AuditItem = mongoose.Schema({
     id : mongoose.Schema.ObjectId,
     jobId : String,
+    sessionId : { type : String, default : null },
     status : String,
-    urls : [
-      { type : String }
-    ]
+    url : String,
+    results : { type : Object, default : null }
   });
-  Models.AuditBatch = mongoose.model("AuditBatch", Schemas.AuditBatch);
+  Models.AuditItem = mongoose.model("AuditItem", Schemas.AuditItem);
 
   callback();
 }

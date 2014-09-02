@@ -79,10 +79,26 @@
       var removeStateChangeListener = $rootScope.$on('$stateChangeSuccess', function stateChangeSuccess(event, toState, toParams, fromState, fromParams){
         $scope.jobId = toParams.jobId || null;
       });
+      OPTool.primus.on("data", function(data) {
+        var options = data.options;
+        var jobId = options.job._id;
+        console.log("Progress updated for Job ID : "+ jobId);
+        console.log(data);
+        if ($scope.jobInfo[jobId] === undefined) {
+          $scope.jobInfo[jobId] = {
+            job : options.job,
+            status : options.job.status,
+            progress : options.progress
+          };
+        }
+        $scope.jobInfo[jobId].progress = options.progress;
+        $scope.$apply();
+      });
       $scope.$on("$destroy", function() { removeStateChangeListener(); });
 
       $scope.jobs = [];
       $scope.jobInfo = {};
+      $scope.startJob = startJob;
 
       $http.get(urls.api +"/active-jobs")
         .success(function(data, status, headers, config) {
@@ -90,8 +106,9 @@
           for(var i=0; i<$scope.jobs.length; i++) {
             var job = $scope.jobs[i];
             $scope.jobInfo[job._id] = {
+              job : job,
               status : "active",
-              progress : 50
+              progress : { percent : 0 }
             };
           }
           var postData = { jobs : $scope.jobs };
@@ -110,9 +127,24 @@
             });
         })
         .error(function(data, status, headers, config) {
-          console.log("Error actiove jobs")
+          console.log("Error active jobs")
           console.log(data);
         });
+
+      /* View Methods */
+      function startJob() {
+        var job = $scope.jobInfo[$scope.jobId].job;
+        var postData = { job : job };
+        $http.post(urls.api +"/job-start", postData)
+          .success(function(data, status, headers, config) {
+            console.log("job started");
+            console.log(data);
+          })
+          .error(function(data, status, headers, config) {
+            console.log("Error starting job");
+            console.log(data);
+          });
+      }
     }
   }
 })(OPTool);
