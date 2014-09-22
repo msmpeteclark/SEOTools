@@ -6,7 +6,8 @@ var dh = require("../../lib/debugHelper.js")({ config : null });
 
 var messageHandlers = {
   NewWork : NewWork,
-  WorkAccepted : WorkAccepted
+  WorkAccepted : WorkAccepted,
+  Shutdown : Shutdown
 };
 
 process.on("message", function(message) {
@@ -21,8 +22,6 @@ ReadyForWork();
 function NewWork(options) {
   var auditItems = options, auditItemLookup = {};
 
-  console.log("NEW WORK!");
-  console.log(auditItems);
   var urls = [];
   auditItems.forEach(function(auditItem) {
     var url = auditItem.url;
@@ -44,16 +43,17 @@ function NewWork(options) {
       };
     },
     onDrain : function() {
-      console.log("finished");
       WorkComplete(auditItems);
     }
   });
 
   c.queue(urls);
 }
-
 function WorkAccepted(options) {
   ReadyForWork();
+}
+function Shutdown(options) {
+  process.exit();
 }
 
 /* Master Methods */

@@ -90,8 +90,6 @@ module.exports = function(dep, settings) {
     };
     Models.Job.find(query, function(err, jobs) {
       if (dh.guard(err, callback)) {return;}
-      console.log("getting active jobs")
-      console.log(jobs);
       callback(null, jobs);
     });
   }
@@ -100,8 +98,6 @@ module.exports = function(dep, settings) {
     var jobId = options.job._id;
     Models.Job.findOne({ _id : jobId }, function(err, job) {
       if (dh.guard(err, callback)) {return;}
-      console.log("getting job")
-      console.log(job);
       callback(null, job);
     });
   }
@@ -113,8 +109,6 @@ module.exports = function(dep, settings) {
     };
     Models.Job.find(query, function(err, jobs) {
       if (dh.guard(err, callback)) {return;}
-      console.log("getting list of jobs")
-      console.log(jobs);
       callback(null, jobs);
     });
   }

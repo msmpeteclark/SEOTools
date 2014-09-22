@@ -27,7 +27,6 @@ module.exports = function(dep) {
       function(done) { driver.initialise({}, done); },
       function(done) { driver.createSession({}, function(err, session) {
         if (dh.guard(err, done)) {return;}
-        console.log("Created session!");
         dbSession = session;
         done();
       }); },

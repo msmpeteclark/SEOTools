@@ -118,10 +118,17 @@ module.exports = function(dep) {
   function setupSocketServer() {
     primus.on("connection", function(spark) {
       console.log("connected to socket server!");
+
       jobManager.events.on("JobProgressUpdated", function(args) {
         console.log("progress updated");
         console.log(args);
         spark.write({ type : "JobProgressUpdated", options : args });
+      });
+
+      jobManager.events.on("JobCompleted", function(args) {
+        console.log("job completed");
+        console.log(args);
+        spark.write({ type : "JobCompleted", options : args });
       });
     });
   }

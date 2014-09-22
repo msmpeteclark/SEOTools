@@ -6,10 +6,6 @@ var Master = require("./audit.master.js");
 
 module.exports = function(dep) {
   var config = dep.config, dh = dep.dh, dataManager = dep.dataManager;
-  var AuditBatchStatus = {
-    NotStarted : "not_started",
-    Complete : "complete"
-  };
   var AuditItemStatus = {
     NotStarted : "not_started",
     Complete : "complete"
@@ -38,35 +34,12 @@ module.exports = function(dep) {
       };
       driver.createModel(opts, function(err, auditBatch) {
         if (dh.guard(err, next)) {return;}
-        console.log("created audit batch");
-        console.log(auditBatch);
         next();
       });
     }, function(err, res) {
       if (dh.guard(err, callback)) {return;}
       callback(null, res);
     });
-    /*
-    (function createBatch(batch) {
-      if (batch.length === 0) {
-        callback();
-        return;
-      }
-
-      var opts = { pluginType : "HTML-Audit", name : "AuditItem",
-        properties : {
-          jobId : job._id,
-          status : AuditBatchStatus.NotStarted,
-          urls : batch
-        }
-      };
-      driver.createModel(opts, function(err, auditBatch) {
-        if (dh.guard(err, callback)) {return;}
-        console.log("created audit batch");
-        console.log(auditBatch);
-        createBatch(urls.splice(0, batchSize));
-      });
-    })(urls.splice(0, batchSize));*/
   }
 
   function progress(options, callback) {
@@ -106,14 +79,14 @@ module.exports = function(dep) {
     var jobMethods = {
       setAuditItemsComplete : setAuditItemsComplete,
       getUnassignedAuditItemsQuery : getUnassignedAuditItemsQuery,
-      jobProgressUpdated : jobProgressUpdated
+      jobProgressUpdated : jobProgressUpdated,
+      jobCompleted : jobCompleted
     };
 
     callback(null, controller);
 
     /* Controller Methods */
     function start(options, callback) {
-      console.log("Starting work");
       Master({ dep : dep, workers : 1, job : job, driver : driver, jobMethods : jobMethods }, function(err, masterController) {
         if (dh.guard(err, callback)) {return;}
         master = masterController;
@@ -144,8 +117,13 @@ module.exports = function(dep) {
     function jobProgressUpdated(options, callback) {
       progress({ driver : driver, job : job }, function(err, jobProgress) {
         if (dh.guard(err, callback)) {return;}
-        jobEvents.emit("JobProgressUpdated", { job : job, progress : jobProgress });
+        jobEvents.emit("JobProgressUpdated", { _id : job._id, progress : jobProgress });
         callback();
+      });
+    }
+    function jobCompleted() {
+      progress({ driver : driver, job : job }, function(err, jobProgress) {
+        jobEvents.emit("JobCompleted", { _id : job._id, progress : jobProgress });
       });
     }
   }

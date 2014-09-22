@@ -72,33 +72,21 @@
     }
 
     function HTMLAudit_ActiveJobs($rootScope, $scope, $http, $state) {
-      console.log("Active jobs");
-      console.log($state);
-
-      $scope.jobId = $state.params.jobId || null;
-      var removeStateChangeListener = $rootScope.$on('$stateChangeSuccess', function stateChangeSuccess(event, toState, toParams, fromState, fromParams){
-        $scope.jobId = toParams.jobId || null;
-      });
-      OPTool.primus.on("data", function(data) {
-        var options = data.options;
-        var jobId = options.job._id;
-        console.log("Progress updated for Job ID : "+ jobId);
-        console.log(data);
-        if ($scope.jobInfo[jobId] === undefined) {
-          $scope.jobInfo[jobId] = {
-            job : options.job,
-            status : options.job.status,
-            progress : options.progress
-          };
-        }
-        $scope.jobInfo[jobId].progress = options.progress;
-        $scope.$apply();
-      });
-      $scope.$on("$destroy", function() { removeStateChangeListener(); });
-
       $scope.jobs = [];
       $scope.jobInfo = {};
+      $scope.jobId = $state.params.jobId || null;
       $scope.startJob = startJob;
+
+      var removeStateChangeListener = $rootScope.$on('$stateChangeSuccess', function stateChangeSuccess(event, toState, toParams, fromState, fromParams) {
+        $scope.jobId = toParams.jobId || null;
+      });
+      $scope.$on("$destroy", function() {
+        removeStateChangeListener();
+        console.log("Destroy active jobs");
+        OPTool.primus.off("data", primusDataListener);
+      });
+
+      OPTool.primus.on("data", primusDataListener);
 
       $http.get(urls.api +"/active-jobs")
         .success(function(data, status, headers, config) {
@@ -107,8 +95,7 @@
             var job = $scope.jobs[i];
             $scope.jobInfo[job._id] = {
               job : job,
-              status : "active",
-              progress : { percent : 0 }
+              progress : { status : "active", percent : 0 }
             };
           }
           var postData = { jobs : $scope.jobs };
@@ -130,6 +117,18 @@
           console.log("Error active jobs")
           console.log(data);
         });
+
+      /* Socket Server Handlers */
+      function primusDataListener(data) {
+        var options = data.options;
+        var jobId = options._id;
+        console.log("Progress updated for Job ID : "+ jobId);
+        console.log(data);
+        if ($scope.jobInfo[jobId] !== undefined) {
+          $scope.jobInfo[jobId].progress = options.progress;
+          $scope.$apply();
+        }
+      }
 
       /* View Methods */
       function startJob() {

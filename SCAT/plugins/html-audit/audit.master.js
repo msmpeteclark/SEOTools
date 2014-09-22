@@ -13,8 +13,6 @@ module.exports = function(options, callback) {
   var workerCount = options.workers || 4;
   var job = options.job, driver = options.driver, jobMethods = options.jobMethods;
 
-  var auditEvents = new events.EventEmitter();
-
   var messageHandlers = {
     ReadyForWork : ReadyForWork,
     WorkComplete : WorkComplete
@@ -22,11 +20,11 @@ module.exports = function(options, callback) {
 
   var dataSession = null;
   var workersById = null, workers = null;
-  var isRunning = false;
+
+  var isRunning = false; isShuttingDown = false;
 
   var controller = {
-    start : start,
-    events : auditEvents
+    start : start
   };
 
   callback(null, controller);
@@ -58,15 +56,24 @@ module.exports = function(options, callback) {
         }
       });
 
+      isRunning = true;
       callback();
     });
   }
 
   /* Message Handlers */
   function ReadyForWork(worker, options) {
+    if (isShuttingDown === true) { Shutdown(worker); return; }
+
     jobMethods.getUnassignedAuditItemsQuery({ jobId : job._id }, function(err, query) {
       driver.getModels({ pluginType : "HTML-Audit", name : "AuditItem", query : query, limit : 2 }, function(err, auditItems) {
         if (dh.guard(err)) {return;}
+        if (auditItems.length === 0) {
+          isShuttingDown = true;
+          Shutdown(worker);
+          return;
+        }
+
         async.forEach(auditItems, function(auditItem, next) {
           auditItem.sessionId = dataSession._id;
           next();
@@ -86,9 +93,7 @@ module.exports = function(options, callback) {
       if (dh.guard(err)) {return;}
       driver.saveModels({ pluginType : "HTML-Audit", name : "AuditItem", models : auditItems }, function(err) {
         if (dh.guard(err)) {return;}
-        console.log("Completion acknowledged.");
         jobMethods.jobProgressUpdated({}, function(err) {
-          console.log("Called method.");
           WorkAccepted(worker);
         });
       });
@@ -101,6 +106,20 @@ module.exports = function(options, callback) {
   }
   function WorkAccepted(worker) {
     worker.send({ type : "WorkAccepted", options : {} });
+  }
+  function Shutdown(worker) {
+    worker.send({ type : "Shutdown", options : {} });
+    for(var i=0; i<workers.length; i++) {
+      if (workers[i].id === worker.id) {
+        workers.splice(i,1);
+        break;
+      }
+    }
+    delete workersById[worker.id];
+
+    if (workers.length === 0) {
+      jobMethods.jobCompleted();
+    }
   }
 
 
