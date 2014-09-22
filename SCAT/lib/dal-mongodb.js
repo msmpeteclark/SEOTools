@@ -22,6 +22,7 @@ module.exports = function(dep, settings) {
     getJobsProgress : getJobsProgress,
     createModel : createModel,
     getModels : getModels,
+    getModelsStream : getModelsStream,
     saveModels : saveModels
   };
   return driver;
@@ -141,6 +142,17 @@ module.exports = function(dep, settings) {
         if (dh.guard(err, callback)) {return;}
         callback(null, models);
       });
+  }
+
+  function getModelsStream(options, callback) {
+    var pluginType = options.pluginType, modelName = options.name,
+        query = options.query, limit = options.limit || 10000;
+
+    var SelectedModel = Models[modelName];
+
+    var q = SelectedModel.find(query).limit(limit)
+    var stream = q.stream();
+    callback(null, stream);
   }
 
   function saveModels(options, callback) {

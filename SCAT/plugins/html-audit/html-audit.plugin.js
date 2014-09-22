@@ -8,7 +8,8 @@ module.exports = function(dep) {
         scriptUrls : [
           "./js/client.js"
         ]
-      }
+      },
+      routes : require("./html-audit.plugin.web.routes.js")(dep)
     },
     dal : {
       registerModels : registerModels

@@ -62,7 +62,8 @@ module.exports = function(dep) {
       res.render("index.ejs", viewData);
     });
 
-    setupPluginsApi()
+    setupPluginsApi();
+    setupPluginsWebRoutes();
   }
 
   function setupPluginsAssets() {
@@ -107,6 +108,29 @@ module.exports = function(dep) {
                   outputString = JSON.stringify(output);
                 }
                 res.end(outputString);
+              }
+            });
+          });
+        });
+      }
+    });
+  }
+
+  function setupPluginsWebRoutes() {
+    pluginStats.forEach(function(stat) {
+      var webRoutes = stat.web.routes;
+      if (webRoutes == undefined) {return;}
+      if (webRoutes.routes !== undefined) {
+        Object.keys(webRoutes.routes).forEach(function(routeUrl) {
+          var routeInfo = webRoutes.routes[routeUrl];
+          var finalUrl = "/"+ stat.web.name + routeUrl;
+          console.log(finalUrl);
+          app.all(finalUrl, function(req, res) {
+            routeInfo.controller({ request: req, response : res }, function(err){
+              if (err) {
+                dh.log("error", err);
+                res.statusCode = 500;
+                res.end(err.toString());
               }
             });
           });

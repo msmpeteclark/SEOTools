@@ -2,7 +2,8 @@
   var urls = {
     root : "/html-audit",
     api : "/html-audit/api",
-    templateFolder : "/html-audit/assets/templates"
+    templateFolder : "/html-audit/assets/templates",
+    downloadReport : function (jobId) { return "/html-audit/report/"+ jobId; }
   };
 
   var plugin = {
@@ -71,11 +72,13 @@
       }
     }
 
-    function HTMLAudit_ActiveJobs($rootScope, $scope, $http, $state) {
+    function HTMLAudit_ActiveJobs($rootScope, $scope, $http, $state, $location) {
       $scope.jobs = [];
       $scope.jobInfo = {};
       $scope.jobId = $state.params.jobId || null;
+
       $scope.startJob = startJob;
+      $scope.downloadReport = downloadReport;
 
       var removeStateChangeListener = $rootScope.$on('$stateChangeSuccess', function stateChangeSuccess(event, toState, toParams, fromState, fromParams) {
         $scope.jobId = toParams.jobId || null;
@@ -143,6 +146,9 @@
             console.log("Error starting job");
             console.log(data);
           });
+      }
+      function downloadReport(jobId) {
+        window.location = urls.downloadReport(jobId);
       }
     }
   }

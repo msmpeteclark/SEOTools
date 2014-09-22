@@ -27,6 +27,7 @@
     <br/>
     <span>Job ID : {{jobId}}</span>
     <br/>
-    <span ng-click="startJob()" class="ui button">Start</span>
+    <span ng-click="startJob()" class="ui button" ng-show="jobInfo[jobId].progress.status !== 'complete'">Start</span>
+    <span ng-click="downloadReport(jobId)" class="ui button" ng-show="jobInfo[jobId].progress.status === 'complete'">View Report</span>
   </div>
 </div>
